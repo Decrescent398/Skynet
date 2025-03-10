@@ -1,0 +1,10 @@
+1. Sample Satellite Data
+OBJECT_NAME     OBJECT_ID   EPOCH                         MEAN_MOTION    ECCENTRICITY    INCLINATION    RA_OF_ASC_NODE      ARG_OF_PERICENTER   MEAN_ANOMALY  EPHEMERIS_TYPE   CLASSIFICATION_TYPE   NORAD_CAT_ID  ELEMENT_SET_NO   REV_AT_EPOCH  BSTAR        MEAN_MOTION_DOT    MEAN_MOTION_DDOT
+CALSPHERE 1     1964-063C   2025-03-09T22:50:57.884640    13.75870924    .0023101        90.2087        61.1528             257.1518            167.8732      0                U                     900           999              757           .11165E-2    .1092E-4           0
+CALSPHERE 2     1964-063E   2025-03-09T22:06:14.236704    13.52850712    .0020004        90.2222        64.9390             131.1743            255.0353      0                U                     902           999              79349         .1028E-3     .77E-6             0
+LCS 1           1965-034C   2025-03-09T18:35:06.460512    9.89308236     .0011468        32.1375        199.7051            276.5198            83.3994       0                U                     1361          999              16389         -.72411E-3   .3E-7              0
+
+2. Sample Space Station Data
+OBJECT_NAME     OBJECT_ID    EPOCH                        MEAN_MOTION   ECCENTRICITY     INCLINATION    RA_OF_ASC_NODE      ARG_OF_PERICENTER   MEAN_ANOMALY  EPHEMERIS_TYPE   CLASSIFICATION_TYPE   NORAD_CAT_ID  ELEMENT_SET_NO   REV_AT_EPOCH   BSTAR       MEAN_MOTION_DOT     MEAN_MOTION_DDOT
+ISS (ZARYA)     1998-067A    2025-03-10T08:50:20.523840   15.49866033   .0006719         51.6377        76.4770             6.4623              133.8926      0                U                     25544         999              49983          .25135E-3   .13854E-3           0
+CSS (TIANHE)    2021-035A    2025-03-09T21:50:06.688896   15.61255575   .0007137         41.4636        265.2033            314.9348            45.0912       0                U                     48274         999              22063          .23303E-3   .20072E-3           0
