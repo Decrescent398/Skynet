@@ -1,5 +1,3 @@
 subprocesses/__pycache__/
 subprocesses/scripts/__pycache__/
-subprocesses/databases/active_satellites.csv
-subprocesses/databases/stations.csv
 .vscode
