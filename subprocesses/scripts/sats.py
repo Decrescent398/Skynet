@@ -2,7 +2,7 @@ from skyfield.api import wgs84
 from skyfield.api import load
 from datetime import datetime
 from math import floor
-from data_scraper import celestrak_data
+from .data_scraper import celestrak_data
 import geocoder
 
 location = geocoder.ip('me')
