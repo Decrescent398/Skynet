@@ -12,7 +12,7 @@ def celestrak_data():
     except: 
         pass
     
-    database = pathlib.Path('./subprocesses/databases')
+    database = pathlib.Path('src/subprocesses/databases')
 
     space_stations = 'stations.csv'
     stations_url = base + '?GROUP=stations&FORMAT=csv'
