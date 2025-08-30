@@ -1,3 +1,11 @@
+*.db
+assets/external/
+*.py[cod]
+__pycache__/
+.states
+.web
 src/subprocesses/__pycache__/
 src/subprocesses/scripts/__pycache__/
 .vscode
+venv/
+.web/
