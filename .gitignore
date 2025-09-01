@@ -9,3 +9,4 @@ src/subprocesses/scripts/__pycache__/
 .vscode
 venv/
 .web/
+test/
