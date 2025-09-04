@@ -8,11 +8,14 @@ import reflex as rx
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+from termcolor import colored
 from sgp4.api import Satrec, WGS72
 from skyfield.api import wgs84
 from skyfield.api import load
 from skyfield.api import EarthSatellite
 from rxconfig import config
+
+timescale = load.timescale()
 
 class State(rx.State):
     """The app state."""
@@ -37,7 +40,28 @@ class State(rx.State):
     
     @rx.event
     def handle_submit(self, form_data: dict):
-        self.custom_data.append(form_data)
+        print(colored("Submitted", "green"))
+        self.custom_data = self.custom_data + [form_data]
+
+        satrec = Satrec()
+        satrec.sgp4init(
+            WGS72,
+            'i',
+            70000 + len(self.custom_data),
+            float(form_data["epoch"]),
+            float(form_data["bstar"]),
+            float(form_data["ndot"]),
+            float(form_data["nddot"]),
+            float(form_data["ecco"]),
+            float(form_data["argpo"]),
+            float(form_data["inclo"]),
+            float(form_data["mo"]),
+            float(form_data["no_kozai"]),
+            float(form_data["nodeo"]),
+        )
+        earth_sat = EarthSatellite.from_satrec(satrec, timescale)
+        self.custom = self.custom + [(form_data["name"], earth_sat)]
+        self.create_map()
     
     @rx.event
     def toggle_stations(self):
@@ -108,7 +132,6 @@ class State(rx.State):
                 uirevision="constant",
                 showlegend=False
                 )
-            self.download_celestrak_data()
         
     @rx.event
     # Download new data if the local file is older than 7 days
@@ -145,30 +168,6 @@ class State(rx.State):
         
         self.satellites = [(fields["OBJECT_NAME"], EarthSatellite.from_omm(timescale, fields)) for fields in sats_data]
         self.stations = [(fields["OBJECT_NAME"], EarthSatellite.from_omm(timescale, fields)) for fields in stations_data]
-        for i, fields in enumerate(self.custom_data):
-            # Convert string values to float
-            satrec = Satrec()
-            satrec.sgp4init(
-                WGS72,           # gravity model
-                'i',             # improved mode
-                50000 + i,       # unique satellite number (avoid conflicts)
-                float(fields["epoch"]),
-                float(fields["bstar"]),
-                float(fields["ndot"]), 
-                float(fields["nddot"]),
-                float(fields["ecco"]),
-                float(fields["argpo"]),
-                float(fields["inclo"]),
-                float(fields["mo"]),
-                float(fields["no_kozai"]),
-                float(fields["nodeo"])
-            )
-            
-            # Create EarthSatellite from the initialized satrec
-            earth_sat = EarthSatellite.from_satrec(satrec, timescale)
-            self.custom.append((fields["name"], earth_sat))
-        
-timescale = load.timescale()
 
 def index() -> rx.Component:
     # Welcome Page (Index)
@@ -431,13 +430,11 @@ def index() -> rx.Component:
                                                 color_scheme="gray"
                                             )
                                         ),
-                                        rx.dialog.close(
-                                            rx.button(
+                                        rx.button(
                                                 "Submit",
                                                 color_scheme="violet",
                                                 type="submit"
-                                            )
-                                        ),
+                                            ),
                                         spacing="3",
                                         justify="end"
                                     ),
