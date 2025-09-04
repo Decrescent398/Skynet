@@ -1,4 +1,5 @@
-#TODO: Fix custom sat, Dynamic Pan, Search, SQL Migration, Sidebar, Icons (Probably), Switch Buffer & Lock, Form error handling, fix pickling error and comments aaagh
+#TODO: 
+#Dynamic Pan, Search, SQL Migration, Sidebar, Icons (Probably), Switch Buffer & Lock, and comments aaagh
 
 import csv
 import time
@@ -17,6 +18,7 @@ class State(rx.State):
     """The app state."""
     custom_data: list = []
     custom: list = []
+    form_error: bool = False
     satellites: list = []
     stations: list = []
     show_satellites: bool = True
@@ -73,7 +75,7 @@ class State(rx.State):
                     lat, lon = wgs84.latlon_of(obj.at(t))
                     coords.append((lat.degrees, lon.degrees, typ, name))
             
-            if len(self.custom) > 0:
+            if self.custom:
                 for sat in self.custom:
                     typ = "Custom"
                     name, obj = sat
@@ -85,9 +87,6 @@ class State(rx.State):
                             lat="lat",
                             lon="lon",
                             color="type",
-                            color_discrete_map={"Satellite": "#636EFA",
-                                                "Station": "#F7374F",
-                                                "Custom": "#FFB200"},
                             hover_name="name",
                             projection="orthographic", 
                             template="plotly_dark",
@@ -109,6 +108,7 @@ class State(rx.State):
                 uirevision="constant",
                 showlegend=False
                 )
+            self.download_celestrak_data()
         
     @rx.event
     # Download new data if the local file is older than 7 days
@@ -145,49 +145,73 @@ class State(rx.State):
         
         self.satellites = [(fields["OBJECT_NAME"], EarthSatellite.from_omm(timescale, fields)) for fields in sats_data]
         self.stations = [(fields["OBJECT_NAME"], EarthSatellite.from_omm(timescale, fields)) for fields in stations_data]
-        self.custom = [(fields["name"], EarthSatellite.from_satrec(satrec.sgp4init(WGS72, 'i', self.custom_data.index(fields), fields["epoch"], \
-                                                                                    fields["bstar"], fields["ndot"], fields["nddot"], fields["ecco"], \
-                                                                                    fields["argpo"], fields["inclo"], fields["mo"], fields["no_kozai"], \
-                                                                                    fields["nodeo"]))) for fields in self.custom_data]
+        for i, fields in enumerate(self.custom_data):
+            # Convert string values to float
+            satrec = Satrec()
+            satrec.sgp4init(
+                WGS72,           # gravity model
+                'i',             # improved mode
+                50000 + i,       # unique satellite number (avoid conflicts)
+                float(fields["epoch"]),
+                float(fields["bstar"]),
+                float(fields["ndot"]), 
+                float(fields["nddot"]),
+                float(fields["ecco"]),
+                float(fields["argpo"]),
+                float(fields["inclo"]),
+                float(fields["mo"]),
+                float(fields["no_kozai"]),
+                float(fields["nodeo"])
+            )
+            
+            # Create EarthSatellite from the initialized satrec
+            earth_sat = EarthSatellite.from_satrec(satrec, timescale)
+            self.custom.append((fields["name"], earth_sat))
         
 timescale = load.timescale()
-satrec = Satrec()
 
 def index() -> rx.Component:
     # Welcome Page (Index)
     return rx.vstack(
+                rx.spacer(),
+                rx.spacer(),
+                rx.spacer(spacing="2"),
                 rx.hstack(
                     rx.hstack(
-                        rx.text("Toggle Satellites: ",
-                                size="4",
-                                weight="medium",
-                                align="center",
-                                color_scheme="purple",
-                                ),
-                        rx.switch(on_change=State.toggle_satellites,
-                                  checked=State.show_satellites,
-                                  size="3",
-                                  color_scheme="iris",
-                                  high_contrast=True,
-                                  radius="full",
-                                  variant="surface"
-                                  ),
-                    ),
-                    rx.hstack(
-                        rx.text("Toggle Space Stations: ",
-                                size="4",
-                                weight="medium",
-                                align="center",
-                                color_scheme="purple"
-                                ),
-                        rx.switch(on_change=State.toggle_stations,
-                                  checked=State.show_stations,
-                                  size="3",
-                                  color_scheme="iris",
-                                  high_contrast=True,
-                                  radius="full",
-                                  variant="surface"
-                                  )
+                        rx.hstack(
+                            rx.text("Toggle Satellites: ",
+                                    size="4",
+                                    weight="medium",
+                                    align="center",
+                                    color_scheme="purple",
+                                    ),
+                            rx.switch(on_change=State.toggle_satellites,
+                                    checked=State.show_satellites,
+                                    size="3",
+                                    color_scheme="iris",
+                                    high_contrast=True,
+                                    radius="full",
+                                    variant="surface"
+                                    ),
+                        ),
+                        rx.hstack(
+                            rx.text("Toggle Space Stations: ",
+                                    size="4",
+                                    weight="medium",
+                                    align="center",
+                                    color_scheme="purple"
+                                    ),
+                            rx.switch(on_change=State.toggle_stations,
+                                    checked=State.show_stations,
+                                    size="3",
+                                    color_scheme="iris",
+                                    high_contrast=True,
+                                    radius="full",
+                                    variant="surface"
+                                    )
+                        ),
+                    align_items = "center",
+                    padding="0 0 0 300px"
                     ),
                     rx.dialog.root(
                         rx.dialog.trigger(
@@ -429,7 +453,9 @@ def index() -> rx.Component:
                     rx.box(
                         rx.image("/www2.gif")
                     ),
-                    align_items="center",
+                    align_items="start",
+                    align="start",
+                    justify="start",
                     spacing="4"
                 ),
             rx.flex(
@@ -442,15 +468,14 @@ def index() -> rx.Component:
                         config={"displayModeBar":False,
                                 "doubleClick": False}),
                 width="100%",
-                height="60vh",
+                height="90vh",
                 direction="row",
-                spacing="3"
+                spacing="3",
             ),
             rx.box(
                 rx.color_mode.button(position="bottom-left"),
             ),
             on_mount=State.download_celestrak_data,
-            align_items = "center",
             justify = "center",
             display = "flex",
         )
