@@ -1,5 +1,5 @@
 #TODO: 
-#Dynamic Pan, Search, SQL Migration, Sidebar, Icons (Probably), Switch Buffer & Lock, and comments aaagh
+#Dynamic Pan, Search, SQL Migration, Sidebar,
 
 import csv
 import time
@@ -111,6 +111,11 @@ class State(rx.State):
                             lat="lat",
                             lon="lon",
                             color="type",
+                            color_discrete_map={
+                                "Satellite" : "#686ffe",
+                                "Station": "#e2344d",
+                                "Custom": "#4ab2ac"
+                            },
                             hover_name="name",
                             projection="orthographic", 
                             template="plotly_dark",
@@ -425,7 +430,7 @@ def index() -> rx.Component:
                                     rx.flex(
                                         rx.dialog.close(
                                             rx.button(
-                                                "Cancel",
+                                                "Close",
                                                 variant="soft",
                                                 color_scheme="gray"
                                             )
