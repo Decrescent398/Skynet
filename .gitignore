@@ -10,3 +10,6 @@ src/subprocesses/scripts/__pycache__/
 venv/
 .web/
 test/
+alembic.ini
+alembic/
+reflex.db-journal
